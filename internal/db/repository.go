@@ -76,7 +76,7 @@ type TxData struct {
 
 func (r *Repository) SaveTxDataToDB(data TxData) error {
 	queryBuilder := squirrel.Insert("transactions").
-		Columns("hash", "from_addr", "to_addr", "value", "contract_addr", "block_number").
+		Columns("hash", "from_addr", "to_addr", "value", "block_number").
 		Values(data.Hash, data.FromAddr, data.ToAddr, data.Value, data.BlockNumber).
 		Suffix("ON CONFLICT (hash) DO NOTHING")
 

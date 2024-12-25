@@ -24,21 +24,28 @@ func (u *Usecase) GetAllTxInfoByBlock(lastBlockInDb int64) error {
 
 	// GETTING INFO ABOUT ALL TX IN BLOCK
 
+	chainID, err := u.Client.NetworkID(context.Background())
+	if err != nil {
+		log.Fatalf("Error getting chain ID: %v", err)
+	}
+
 	for _, tx := range block.Transactions() {
 
 		//GETTING SENDER ADDRESS
-		chainID, err := u.Client.NetworkID(context.Background())
+		senderAddr, err := types.Sender(types.NewEIP155Signer(chainID), tx)
 		if err != nil {
-			log.Fatalf("Error getting chain ID: %v", err)
+			senderAddr, err = types.Sender(types.HomesteadSigner{}, tx)
 		}
 
-		senderAddr, err := types.Sender(types.NewLondonSigner(chainID), tx)
-		if err != nil {
-			log.Fatalf("Error getting sennder address: %v", err)
+		var toAddr string
+		if tx.To() != nil {
+			toAddr = tx.To().Hex()
+		} else {
+			toAddr = "Contract Creation"
 		}
 
 		//CHECKING ADDRESS
-		if senderAddr.String() == os.Getenv("SENDER_ADDR") || senderAddr.String() == os.Getenv("CONTRACT_ADDRESS") {
+		if senderAddr.String() == os.Getenv("SENDER_ADDR") || toAddr == os.Getenv("CONTRACT_ADDRESS") {
 			data := db.TxData{
 				Hash:        tx.Hash().Hex(),
 				FromAddr:    senderAddr.String(),
@@ -61,17 +68,11 @@ func (u *Usecase) GetAllTxInfoByBlock(lastBlockInDb int64) error {
 }
 
 /*
-func (u *Usecase) GetSenderAddr(tx *types.Transaction) common.Address {
-	chainID, err := u.Client.NetworkID(context.Background())
+	signer := types.NewLondonSigner(chainID) // !!!!!!!!!!!!
+
+	senderAddr, err := types.Sender(signer, tx)
 	if err != nil {
-		log.Fatalf("Error getting chain ID: %v", err)
+		log.Fatalf("Error getting sennder address: %v", err)
 	}
 
-	sender, err := types.Sender(types.NewLondonSigner(chainID), tx)
-	if err != nil {
-		log.Fatalf("Error getting sender addres: %v", err)
-	}
-
-	return sender
-}
 */
