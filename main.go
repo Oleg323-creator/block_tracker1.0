@@ -8,6 +8,7 @@ import (
 	"github.com/joho/godotenv"
 	"log"
 	"os"
+	"time"
 )
 
 func main() {
@@ -60,6 +61,15 @@ func main() {
 	for {
 		for i := lastBlockInDB; i <= lastReleasedBlock.Number().Int64(); i++ {
 
+			lastReleasedBlock, err = usecase.Client.BlockByNumber(context.Background(), nil)
+			if err != nil {
+				log.Printf("Failed to fetch the latest block: %v", err)
+			}
+			if lastBlockInDB == lastReleasedBlock.Number().Int64() {
+				time.Sleep(3 * time.Second)
+			}
+			log.Printf("Last released block: %d", lastReleasedBlock.Number().Int64())
+
 			err = usecase.GetAllTxInfoByBlock(i)
 			if err != nil {
 				log.Fatalf("Error getting tx data: %v", err)
@@ -75,6 +85,7 @@ func main() {
 		log.Println("4")
 
 		lastBlockInDB = lastReleasedBlock.Number().Int64()
+		time.Sleep(2 * time.Second)
 
 	}
 }

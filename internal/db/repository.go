@@ -67,17 +67,19 @@ func (r *Repository) GetLastBlockFromDB() (int64, error) {
 }
 
 type TxData struct {
-	Hash        string
-	FromAddr    string
-	ToAddr      string
-	Value       string
-	BlockNumber int64
+	Hash         string
+	FromAddr     string
+	ContractAddr string
+	ToAddr       string
+	Amount       string
+	Value        string
+	BlockNumber  int64
 }
 
 func (r *Repository) SaveTxDataToDB(data TxData) error {
 	queryBuilder := squirrel.Insert("transactions").
-		Columns("hash", "from_addr", "to_addr", "value", "block_number").
-		Values(data.Hash, data.FromAddr, data.ToAddr, data.Value, data.BlockNumber).
+		Columns("hash", "from_addr", "contract_addr", "to_addr", "amount", "value", "block_number").
+		Values(data.Hash, data.FromAddr, data.ContractAddr, data.ToAddr, data.Amount, data.Value, data.BlockNumber).
 		Suffix("ON CONFLICT (hash) DO NOTHING")
 
 	query, args, err := queryBuilder.PlaceholderFormat(squirrel.Dollar).ToSql()
