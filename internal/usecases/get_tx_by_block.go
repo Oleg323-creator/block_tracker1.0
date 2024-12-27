@@ -98,7 +98,6 @@ func CheckTxData(tx *types.Transaction, tokenABI abi.ABI) (common.Address, *big.
 		return emptyAddress, big.NewInt(0), fmt.Errorf("There is no transfer method")
 	}
 
-	// Распаковываем данные
 	args := make(map[string]interface{})
 	err = method.Inputs.UnpackIntoMap(args, info[4:])
 	if err != nil {
